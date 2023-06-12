@@ -1,13 +1,21 @@
 package com.rapptrlabs.androidtest.chat
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.rapptrlabs.androidtest.MainActivity
-import com.rapptrlabs.androidtest.api.ChatMessageModel
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import com.rapptrlabs.androidtest.R
+import com.rapptrlabs.androidtest.chat.model.ChatsModel
 import com.rapptrlabs.androidtest.databinding.ActivityChatBinding
+import com.rapptrlabs.androidtest.getJsonDataFromAsset
+import com.rapptrlabs.androidtest.isInternetAvailable
+import com.rapptrlabs.androidtest.remote.responsemanager.ResponseStateHandler
+import com.rapptrlabs.androidtest.repository.SharedViewModel
+import org.koin.android.ext.android.inject
 
 /**
  * Screen that displays a list of chats from a chat log.
@@ -15,10 +23,11 @@ import com.rapptrlabs.androidtest.databinding.ActivityChatBinding
 class ChatActivity : AppCompatActivity() {
     private lateinit var binding: ActivityChatBinding
     private lateinit var chatAdapter: ChatAdapter
+    private val sharedViewModel: SharedViewModel by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        title = getString(R.string.activity_chat_title)
         binding = ActivityChatBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -27,40 +36,57 @@ class ChatActivity : AppCompatActivity() {
             setDisplayShowHomeEnabled(true)
         }
 
-        val tempList = mutableListOf<ChatMessageModel>()
-        for (i in 0..7) {
-            tempList.add(
-                ChatMessageModel(
-                    i,
-                    "",
-                    "User $i",
-                    "This is test message $i. Please retrieve real data."
-                )
-            )
-        }
-        chatAdapter = ChatAdapter(tempList)
+        /**
+         * checks if device is connected to internet.
+         * If conditions are met, it makes a network request to get chats from remote api, else
+         * it returns dummy chats
+         */
+        if (isInternetAvailable(this)) observeMessages() else initRecyclerView(getDummyChats(this))
+    }
 
+    private fun initRecyclerView(chats: ChatsModel) {
+        chatAdapter = ChatAdapter(chats.data)
         binding.recyclerView.apply {
             adapter = chatAdapter
             setHasFixedSize(true)
-            layoutManager = LinearLayoutManager(this@ChatActivity, LinearLayoutManager.VERTICAL, false)
+            layoutManager =
+                LinearLayoutManager(this@ChatActivity, LinearLayoutManager.VERTICAL, false)
         }
-
-        // TODO: Make the UI look like it does in the mock-up. Allow for horizontal screen rotation.
-
-        // TODO: Retrieve the chat data from http://dev.rapptrlabs.com/Tests/scripts/chat_log.php
-        // TODO: Parse this chat data from JSON into ChatLogMessageModel and display it.
     }
 
-    override fun onBackPressed() {
-        val intent = Intent(this, MainActivity::class.java)
-        startActivity(intent)
+    /**
+     * Reads json file's content as string, convert it to an object using Gson and collects the chats
+     */
+    private fun getDummyChats(context: Context): ChatsModel {
+        val jsonFileString = getJsonDataFromAsset(context, "DummyChatMessages.json")
+        val gson = Gson()
+        val chatMessageModel = object : TypeToken<ChatsModel>() {}.type
+        return gson.fromJson(jsonFileString, chatMessageModel)
     }
 
-    companion object {
-        fun start(context: Context) {
-            val intent = Intent(context, ChatActivity::class.java)
-            context.startActivity(intent)
+    /**
+     * Observe chats from remote api and update UI based on the returned response
+     */
+    private fun observeMessages() {
+        sharedViewModel.getChats().observe(this) {
+            when(it) {
+                is ResponseStateHandler.Loading -> {/*Show loading dialog*/}
+                is ResponseStateHandler.Success -> {
+                    it.data?.let { chats -> initRecyclerView(chats) }
+                }
+                is ResponseStateHandler.Error -> {
+                    Log.e("ERROR", "observeMessages: ${it.message}")
+                    Toast.makeText(this, "Failed to load chats, please try again", Toast.LENGTH_SHORT).show()
+                }
+                is ResponseStateHandler.Exception -> {
+                    Log.e("EXCEPTION_ERROR", "observeMessages: ${it.exception}")
+                    Toast.makeText(this, "Failed to load chats, please try again", Toast.LENGTH_SHORT).show()
+                }
+                is ResponseStateHandler.ThrowableError -> {
+                    Log.e("THROWABLE_ERROR", "observeMessages: ${it.throwable}")
+                    Toast.makeText(this, "Failed to load chats, please try again", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 }
