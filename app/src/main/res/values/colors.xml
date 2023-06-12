@@ -6,6 +6,12 @@
     <color name="background">#F9F9F9</color>
     <color name="button_blue">#0E5C89</color>
     <color name="chat_text">#1B1E1F</color>
-    <color name="transparent_color">#66FFFFFF</color>
+    <color name="transparent_color">#B4FFFFFF</color>
     <color name="transparent_text_hint_color">#B2F1F1F1</color>
+    <color name="underline_normal">#00FFFFFF</color>
+    <color name="underline_focused">#077FC5</color>
+    <color name="invisible_color">#1BFFFFFF</color>
+    <color name="ripple_color">#80FFFFFF</color>
+    <color name="button_pressed_color">#0E5C89</color>
+    <color name="button_default_color">#0E5C89</color>
 </resources>

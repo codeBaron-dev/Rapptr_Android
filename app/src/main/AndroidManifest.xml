@@ -26,7 +26,11 @@
         </activity>
 
         <activity android:name=".animation.AnimationActivity" />
-        <activity android:name=".chat.ChatActivity" />
-        <activity android:name=".login.LoginActivity" />
+        <activity
+            android:name=".chat.ChatActivity"
+            android:screenOrientation="fullSensor" />
+        <activity
+            android:name=".login.LoginActivity"
+            android:screenOrientation="fullSensor" />
     </application>
 </manifest>

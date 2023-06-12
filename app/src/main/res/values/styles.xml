@@ -8,4 +8,9 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="CustomEditText" parent="Widget.AppCompat.EditText">
+        <item name="colorControlNormal">@color/underline_normal</item>
+        <item name="colorControlActivated">@color/underline_focused</item>
+    </style>
+
 </resources>
