@@ -13,8 +13,6 @@ import android.net.NetworkCapabilities
 import com.squareup.picasso.Transformation
 import java.io.IOException
 import java.util.concurrent.TimeUnit
-
-
 fun convertMillisecondsToTime(milliseconds: Long): String {
     val seconds = TimeUnit.MILLISECONDS.toSeconds(milliseconds) % 60
     val sb = StringBuilder()

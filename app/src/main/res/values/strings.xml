@@ -12,5 +12,7 @@
     <string name="email_address">Email Address</string>
     <string name="password">Password</string>
     <string name="activity_login_title">Login</string>
+    <string name="activity_animation_title">Animation</string>
+    <string name="fade_in">Fade In</string>
 
 </resources>
