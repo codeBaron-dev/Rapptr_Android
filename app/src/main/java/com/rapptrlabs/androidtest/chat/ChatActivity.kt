@@ -2,7 +2,7 @@ package com.rapptrlabs.androidtest.chat
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -17,9 +17,6 @@ import com.rapptrlabs.androidtest.remote.responsemanager.ResponseStateHandler
 import com.rapptrlabs.androidtest.repository.SharedViewModel
 import org.koin.android.ext.android.inject
 
-/**
- * Screen that displays a list of chats from a chat log.
- */
 class ChatActivity : AppCompatActivity() {
     private lateinit var binding: ActivityChatBinding
     private lateinit var chatAdapter: ChatAdapter
@@ -70,20 +67,23 @@ class ChatActivity : AppCompatActivity() {
     private fun observeMessages() {
         sharedViewModel.getChats().observe(this) {
             when(it) {
-                is ResponseStateHandler.Loading -> {/*Show loading dialog*/}
+                is ResponseStateHandler.Loading -> {
+                    binding.progressBarContainer.visibility =  View.VISIBLE
+                }
                 is ResponseStateHandler.Success -> {
+                    binding.progressBarContainer.visibility =  View.GONE
                     it.data?.let { chats -> initRecyclerView(chats) }
                 }
                 is ResponseStateHandler.Error -> {
-                    Log.e("ERROR", "observeMessages: ${it.message}")
+                    binding.progressBarContainer.visibility =  View.GONE
                     Toast.makeText(this, "Failed to load chats, please try again", Toast.LENGTH_SHORT).show()
                 }
                 is ResponseStateHandler.Exception -> {
-                    Log.e("EXCEPTION_ERROR", "observeMessages: ${it.exception}")
+                    binding.progressBarContainer.visibility =  View.GONE
                     Toast.makeText(this, "Failed to load chats, please try again", Toast.LENGTH_SHORT).show()
                 }
                 is ResponseStateHandler.ThrowableError -> {
-                    Log.e("THROWABLE_ERROR", "observeMessages: ${it.throwable}")
+                    binding.progressBarContainer.visibility =  View.GONE
                     Toast.makeText(this, "Failed to load chats, please try again", Toast.LENGTH_SHORT).show()
                 }
             }

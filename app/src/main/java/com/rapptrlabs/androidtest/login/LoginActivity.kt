@@ -3,6 +3,8 @@ package com.rapptrlabs.androidtest.login
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.os.Bundle
+import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.rapptrlabs.androidtest.Prefs
 import com.rapptrlabs.androidtest.R
@@ -52,16 +54,27 @@ class LoginActivity : AppCompatActivity() {
     private fun loginUser(email: String, password: String) {
         sharedViewModel.login(email, password, this).observe(this) {
             when (it) {
-                is ResponseStateHandler.Loading -> {/*Show loading*/
+                is ResponseStateHandler.Loading -> {
+                    binding.progressBarContainer.visibility =  View.VISIBLE
                 }
 
                 is ResponseStateHandler.Success -> {
+                    binding.progressBarContainer.visibility =  View.GONE
                     displayDialog(it.data)
                 }
 
-                is ResponseStateHandler.Error -> {}
-                is ResponseStateHandler.Exception -> {}
-                is ResponseStateHandler.ThrowableError -> {}
+                is ResponseStateHandler.Error -> {
+                    Toast.makeText(this, it.message, Toast.LENGTH_SHORT).show()
+                    binding.progressBarContainer.visibility =  View.GONE
+                }
+                is ResponseStateHandler.Exception -> {
+                    Toast.makeText(this, it.exception.message, Toast.LENGTH_SHORT).show()
+                    binding.progressBarContainer.visibility =  View.GONE
+                }
+                is ResponseStateHandler.ThrowableError -> {
+                    Toast.makeText(this, it.throwable.message, Toast.LENGTH_SHORT).show()
+                    binding.progressBarContainer.visibility =  View.GONE
+                }
             }
         }
     }
